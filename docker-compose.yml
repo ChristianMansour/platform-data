@@ -41,6 +41,20 @@ services:
     depends_on:
       - postgres
 
+  code-server:
+    image: codercom/code-server:latest
+    container_name: code-server
+    restart: unless-stopped
+    environment:
+      - PASSWORD=admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/docker-volumes/code-server:/home/coder/.local/share/code-server
+      - ~/platform-data:/home/coder/project
+    networks:
+      - platform-net
+
 networks:
   platform-net:
     external: true

@@ -1,6 +1,6 @@
 # Platform Data - Infrastructure
 
-Ce projet contient l'infrastructure de la plateforme data avec PostgreSQL, Redis et pgAdmin.
+Ce projet contient l'infrastructure de la plateforme data avec PostgreSQL, Redis, pgAdmin et VS Code Server.
 
 ## Prérequis
 
@@ -15,7 +15,8 @@ Ce projet contient l'infrastructure de la plateforme data avec PostgreSQL, Redis
 ├── docker-volumes/
 │   ├── postgres/             # Données PostgreSQL
 │   ├── redis/                # Données Redis
-│   └── pgadmin/              # Configuration pgAdmin
+│   ├── pgadmin/              # Configuration pgAdmin
+│   └── code-server/          # Configuration VS Code Server
 ```
 
 ## Installation et lancement
@@ -25,19 +26,27 @@ Ce projet contient l'infrastructure de la plateforme data avec PostgreSQL, Redis
 docker network create platform-net
 ```
 
-### 2. Lancer les services
+### 2. Créer les dossiers pour les volumes
+```bash
+mkdir -p /opt/docker-volumes/postgres
+mkdir -p /opt/docker-volumes/redis
+mkdir -p /opt/docker-volumes/pgadmin
+mkdir -p /opt/docker-volumes/code-server
+```
+
+### 3. Lancer les services
 
 Depuis le répertoire du projet (`~/platform-data`) :
 ```bash
 docker compose up -d
 ```
 
-### 3. Vérifier que les services tournent
+### 4. Vérifier que les services tournent
 ```bash
 docker ps
 ```
 
-Vous devez voir 3 conteneurs : `postgres-warehouse`, `redis`, `pgadmin`.
+Vous devez voir 4 conteneurs : `postgres-warehouse`, `redis`, `pgadmin`, `code-server`.
 
 ## Accès aux services
 
@@ -55,6 +64,10 @@ Vous devez voir 3 conteneurs : `postgres-warehouse`, `redis`, `pgadmin`.
 ### pgAdmin
 - **URL** : http://10.1.1.1:5050
 - **Email** : admin@admin.com
+- **Password** : admin
+
+### VS Code Server
+- **URL** : http://10.1.1.1:8080
 - **Password** : admin
 
 ## Vérification de l'installation
