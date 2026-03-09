@@ -12,7 +12,7 @@ from airflow.sdk import dag, task
 def hello_world_dag():
     @task
     def say_hello() -> str:
-        msg = "Hello, Airflow 3.x!"
+        msg = "Hello from GitHub! Cycle complet validé!"
         print(msg)
         return msg
 
