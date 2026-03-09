@@ -13,7 +13,11 @@ import json
 )
 def openmeteo_extraction_dag():
     
-    @task
+    @task(
+        retries=3,                              # Nombre de tentatives
+        retry_delay=timedelta(minutes=2),       # Délai entre chaque retry
+        retry_exponential_backoff=True,         # Augmente le délai à chaque retry
+    )
     def fetch_weather_data() -> str:
         """Récupère les données météo depuis Open-Meteo API"""
         
