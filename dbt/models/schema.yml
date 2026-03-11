@@ -2,43 +2,96 @@ version: 2
 
 models:
   - name: meteo_quotidien
-    description: Données météo quotidiennes (couche Silver)
+    description: |
+      Données météo quotidiennes nettoyées (couche Silver).
+      Source : API Open-Meteo pour Marseille.
+      Fréquence : Quotidienne
     columns:
       - name: date_meteo
-        description: Date des observations météo
+        description: Date des observations météorologiques
         tests:
           - not_null
           - unique
+      - name: tmax
+        description: Température maximale quotidienne en °C
+      - name: tmin
+        description: Température minimale quotidienne en °C
+      - name: precipitation
+        description: Précipitations totales en mm
 
   - name: dvf_mutations
-    description: Mutations DVF nettoyées (couche Silver)
+    description: |
+      Mutations immobilières DVF 2025 nettoyées (couche Silver).
+      Source : data.gouv.fr - Demandes de Valeurs Foncières
+      Scope : France entière, transactions avec valeur foncière > 0
     columns:
       - name: date_mutation
-        description: Date de la mutation
+        description: Date de la transaction immobilière
         tests:
           - not_null
       - name: valeur_fonciere
-        description: Valeur foncière de la transaction
+        description: Montant de la transaction en euros
         tests:
           - not_null
+      - name: code_commune
+        description: Code INSEE de la commune
+      - name: nom_commune
+        description: Nom de la commune
+      - name: type_local
+        description: Type de bien (Maison, Appartement, etc.)
+      - name: surface_reelle_bati
+        description: Surface réelle bâtie en m²
+      - name: nombre_pieces_principales
+        description: Nombre de pièces principales
 
   - name: dim_commune
-    description: Dimension des communes
+    description: |
+      Dimension des communes (couche Gold).
+      Table de référence pour le schéma en étoile DVF.
     columns:
       - name: commune_id
-        description: Identifiant unique de la commune
+        description: Identifiant unique de la commune (code INSEE)
         tests:
           - unique
           - not_null
+      - name: code_commune
+        description: Code INSEE de la commune
+      - name: nom_commune
+        description: Nom officiel de la commune
 
   - name: dim_type_local
-    description: Dimension des types de locaux
+    description: |
+      Dimension des types de locaux (couche Gold).
+      Table de référence pour le schéma en étoile DVF.
     columns:
       - name: type_local_id
         description: Identifiant unique du type de local
         tests:
           - unique
           - not_null
+      - name: libelle
+        description: Libellé du type de local (Maison, Appartement, etc.)
 
   - name: fact_mutations
-    description: Table de fait des mutations immobilières
+    description: |
+      Table de fait des mutations immobilières (couche Gold).
+      Schéma en étoile - contient les métriques et références aux dimensions.
+      Granularité : Une ligne par transaction immobilière.
+    columns:
+      - name: date_mutation
+        description: Date de la transaction
+      - name: valeur_fonciere
+        description: Montant de la transaction en euros
+      - name: surface_reelle_bati
+        description: Surface réelle bâtie en m²
+      - name: nombre_pieces_principales
+        description: Nombre de pièces principales
+      - name: code_commune
+        description: Clé étrangère vers dim_commune
+      - name: type_local
+        description: Clé étrangère vers dim_type_local
+
+  - name: mart_meteo_quotidien
+    description: |
+      Mart météo - Agrégats quotidiens (couche Gold).
+      Métriques : Moyennes de températures et cumul de précipitations.

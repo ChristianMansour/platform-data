@@ -2,11 +2,25 @@ version: 2
 
 sources:
   - name: bronze
-    description: Données brutes chargées en séance 3
+    description: |
+      Couche Bronze - Données brutes chargées par Airflow.
+      Schéma : bronze
+      Source : Pipelines d'extraction Airflow (DAGs DVF et météo)
     database: warehouse
     schema: bronze
     tables:
       - name: dvf_mutations
-        description: Mutations DVF (Demandes de valeurs foncières)
+        description: |
+          Mutations immobilières DVF 2025 (données brutes).
+          Format : CSV pipe-delimited
+          Source : data.gouv.fr
+          Chargement : Airflow DAG dvf_2025_extraction
+          Volumétrie : ~1.4M lignes
+        
       - name: meteo_quotidien
-        description: Données météo quotidiennes Open-Meteo
+        description: |
+          Données météo quotidiennes Open-Meteo (données brutes).
+          Format : JSON
+          Source : API Open-Meteo (Marseille)
+          Chargement : Airflow DAG openmeteo_extraction
+          Volumétrie : ~7 jours
