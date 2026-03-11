@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: meteo_quotidien
+    description: Données météo quotidiennes (couche Silver)
+    columns:
+      - name: date_meteo
+        description: Date des observations météo
+        tests:
+          - not_null
+          - unique
+
+  - name: dvf_mutations
+    description: Mutations DVF nettoyées (couche Silver)
+    columns:
+      - name: date_mutation
+        description: Date de la mutation
+        tests:
+          - not_null
+      - name: valeur_fonciere
+        description: Valeur foncière de la transaction
+        tests:
+          - not_null
+
+  - name: dim_commune
+    description: Dimension des communes
+    columns:
+      - name: commune_id
+        description: Identifiant unique de la commune
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_type_local
+    description: Dimension des types de locaux
+    columns:
+      - name: type_local_id
+        description: Identifiant unique du type de local
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_mutations
+    description: Table de fait des mutations immobilières
