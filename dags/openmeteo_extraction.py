@@ -6,6 +6,8 @@ from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.operators.python import PythonOperator
 import pandas as pd
 from sqlalchemy import create_engine
+
+
 TRANSFORM_METEO_SQL = """
 DROP TABLE IF EXISTS silver.meteo_quotidien;
 
@@ -19,6 +21,7 @@ FROM bronze.meteo_quotidien
 ORDER BY date;
 """
 
+
 @dag(
     dag_id="openmeteo_extraction",
     schedule="@daily",
@@ -29,9 +32,9 @@ ORDER BY date;
 def openmeteo_extraction_dag():
     
     @task(
-        retries=3,                              # Nombre de tentatives
-        retry_delay=timedelta(minutes=2),       # Délai entre chaque retry
-        retry_exponential_backoff=True,         # Augmente le délai à chaque retry
+        retries=3,
+        retry_delay=timedelta(minutes=2),
+        retry_exponential_backoff=True,
     )
     def fetch_weather_data() -> str:
         """Récupère les données météo depuis Open-Meteo API"""
@@ -63,7 +66,8 @@ def openmeteo_extraction_dag():
         print(f"Période : {data['daily']['time'][0]} à {data['daily']['time'][-1]}")
         
         return output_path
-@task
+    
+    @task
     def load_to_bronze() -> None:
         """Charge les données JSON dans bronze.meteo_quotidien"""
         import pandas as pd
@@ -98,11 +102,9 @@ def openmeteo_extraction_dag():
             index=False,
         )
         
-   
-
-     print(f" {len(df)} lignes chargées dans bronze.meteo_quotidien")
+        print(f" {len(df)} lignes chargées dans bronze.meteo_quotidien")
     
-@task
+    @task
     def transform_to_silver() -> None:
         """Transformation SQL bronze -> silver"""
         from airflow.providers.postgres.hooks.postgres import PostgresHook
@@ -113,10 +115,6 @@ def openmeteo_extraction_dag():
     
     # Chaîner les tâches
     fetch_weather_data() >> load_to_bronze() >> transform_to_silver()
-
-
-
-    
 
 
 openmeteo_dag = openmeteo_extraction_dag()
