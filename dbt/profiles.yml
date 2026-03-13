@@ -1,0 +1,12 @@
+platform_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres-warehouse
+      port: 5432
+      user: svc_dwh
+      password: svc_dwh
+      dbname: warehouse
+      schema: bronze
+      threads: 2
