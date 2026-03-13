@@ -1,4 +1,5 @@
 from datetime import datetime
+from airflow.hooks.base import BaseHook
 from airflow.decorators import dag, task
 from airflow.providers.standard.operators.bash import BashOperator
 import requests
@@ -66,8 +67,11 @@ def elt_e2e_dag():
             "temperature_min": data["daily"]["temperature_2m_min"],
             "precipitation": data["daily"]["precipitation_sum"],
         })
-        
-        engine = create_engine("postgresql://svc_dwh:svc_dwh@postgres-warehouse:5432/warehouse")
+
+        conn = BaseHook.get_connection("postgres_warehouse")
+        engine = create_engine(
+            f"postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}"
+        )        
         df.to_sql("meteo_quotidien", engine, schema="bronze", if_exists="replace", index=False)
         
         print(f" {len(df)} lignes chargées dans bronze.meteo_quotidien")
@@ -82,8 +86,11 @@ def elt_e2e_dag():
         ]
         
         df = pd.read_csv(csv_path, compression='gzip', usecols=columns_to_keep, low_memory=False)
-        
-        engine = create_engine("postgresql://svc_dwh:svc_dwh@postgres-warehouse:5432/warehouse")
+
+        conn = BaseHook.get_connection("postgres_warehouse")
+        engine = create_engine(
+            f"postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}"
+        )
         df.to_sql("dvf_mutations", engine, schema="bronze", if_exists="replace", index=False, chunksize=10000)
         
         print(f" {len(df)} lignes chargées dans bronze.dvf_mutations")
