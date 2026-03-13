@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
-from airflow.sdk import dag, task
-from airflow.operators.bash import BashOperator
+from datetime import datetime
+from airflow.decorators import dag, task
+from airflow.providers.standard.operators.bash import BashOperator
 import requests
 import json
 import pandas as pd
@@ -19,7 +19,7 @@ def elt_e2e_dag():
     # ============ EXTRACT ============
     
     @task
-    def extract_meteo() -> str:
+    def extract_meteo():
         """Extraction météo depuis Open-Meteo API"""
         latitude = 43.2965
         longitude = 5.3698
@@ -37,7 +37,7 @@ def elt_e2e_dag():
         return output_path
     
     @task
-    def extract_dvf() -> str:
+    def extract_dvf():
         """Extraction DVF depuis data.gouv.fr"""
         url = "https://files.data.gouv.fr/geo-dvf/latest/csv/2025/full.csv.gz"
         output_path = "/opt/airflow/data/dvf_2025.csv.gz"
@@ -55,10 +55,8 @@ def elt_e2e_dag():
     # ============ LOAD BRONZE ============
     
     @task
-    def load_meteo_to_bronze() -> None:
+    def load_meteo_to_bronze(json_path):
         """Chargement météo dans Bronze"""
-        json_path = "/opt/airflow/data/openmeteo_marseille.json"
-        
         with open(json_path, 'r') as f:
             data = json.load(f)
         
@@ -75,10 +73,8 @@ def elt_e2e_dag():
         print(f" {len(df)} lignes chargées dans bronze.meteo_quotidien")
     
     @task
-    def load_dvf_to_bronze() -> None:
+    def load_dvf_to_bronze(csv_path):
         """Chargement DVF dans Bronze"""
-        csv_path = "/opt/airflow/data/dvf_2025.csv.gz"
-        
         columns_to_keep = [
             'date_mutation', 'nature_mutation', 'valeur_fonciere',
             'code_commune', 'nom_commune', 'type_local',
@@ -106,16 +102,16 @@ def elt_e2e_dag():
     
     # ============ ORCHESTRATION ============
     
-    # Extract
-    meteo_extracted = extract_meteo()
-    dvf_extracted = extract_dvf()
+    # Extract tasks
+    meteo_file = extract_meteo()
+    dvf_file = extract_dvf()
     
-    # Load (après extract)
-    meteo_loaded = load_meteo_to_bronze()
-    dvf_loaded = load_dvf_to_bronze()
+    # Load tasks (use outputs from extract)
+    load_meteo = load_meteo_to_bronze(meteo_file)
+    load_dvf = load_dvf_to_bronze(dvf_file)
     
-    # Dependencies
-    [meteo_extracted, dvf_extracted] >> [meteo_loaded, dvf_loaded] >> run_dbt >> test_dbt
+    # Dependencies: both loads must finish before dbt
+    [load_meteo, load_dvf] >> run_dbt >> test_dbt
 
 
-elt_e2e = elt_e2e_dag()
+elt_e2e_dag()
