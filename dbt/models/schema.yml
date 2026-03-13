@@ -95,3 +95,17 @@ models:
     description: |
       Mart météo - Agrégats quotidiens (couche Gold).
       Métriques : Moyennes de températures et cumul de précipitations.
+  - name: mart_dvf_par_commune
+      description: Analyses agrégées par commune des mutations DVF
+      columns:
+        - name: code_commune
+          description: Code INSEE de la commune
+          tests:
+            - not_null
+            - unique
+        - name: nb_mutations
+          description: Nombre total de mutations dans la commune
+          tests:
+            - not_null
+        - name: prix_m2_moyen
+          description: Prix moyen au m² dans la commune
