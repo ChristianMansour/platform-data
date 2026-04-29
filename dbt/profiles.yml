@@ -10,3 +10,13 @@ platform_dbt:
       dbname: warehouse
       schema: bronze
       threads: 2
+    snowflake:
+      type: snowflake
+      account: XXLIRRB-PG74236
+      user: svc_terraform
+      password: TerraformPass123!
+      role: ACCOUNTADMIN
+      warehouse: PLATFORM_WH
+      database: PLATFORM_DB
+      schema: SILVER
+      threads: 2
