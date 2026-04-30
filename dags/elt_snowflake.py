@@ -16,11 +16,8 @@ from pathlib import Path
 )
 def elt_snowflake_dag():
     
-    # ========== EXTRACT ==========
-    
     @task
     def extract_meteo():
-        """Extraction météo depuis Open-Meteo API"""
         latitude = 43.2965
         longitude = 5.3698
         url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe/Paris"
@@ -38,14 +35,11 @@ def elt_snowflake_dag():
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         
-        print(f"✅ Météo extraite : {output_path}")
+        print(f"Meteo extraite : {output_path}")
         return str(output_path)
-    
-    # ========== LOAD RAW STAGE ==========
     
     @task
     def put_to_raw_stage(filepath: str):
-        """Déposer le fichier dans RAW_STAGE"""
         import snowflake.connector
         from airflow.hooks.base import BaseHook
         
@@ -72,9 +66,7 @@ def elt_snowflake_dag():
         cursor.close()
         cnx.close()
         
-        print(f"✅ Fichier déposé dans RAW_STAGE/meteo/date={today}/")
-    
-    # ========== LOAD BRONZE ==========
+        print(f"Fichier depose dans RAW_STAGE")
     
     create_bronze_table = SQLExecuteQueryOperator(
         task_id="create_bronze_table",
@@ -109,14 +101,10 @@ def elt_snowflake_dag():
         """,
     )
     
-    # ========== TRANSFORM (dbt) ==========
-    
     run_dbt_snowflake = BashOperator(
         task_id="run_dbt_snowflake",
         bash_command="cd /opt/airflow/dbt && dbt run --profiles-dir /opt/airflow/dbt --target snowflake --select meteo_quotidien_snowflake mart_meteo_snowflake",
     )
-    
-    # ========== ORCHESTRATION ==========
     
     meteo_file = extract_meteo()
     put_stage = put_to_raw_stage(meteo_file)
