@@ -60,13 +60,10 @@ def elt_snowflake_dag():
         today = datetime.now().strftime("%Y-%m-%d")
         
         put_cmd = f"PUT file://{filepath} @RAW_STAGE/meteo/date={today}/ AUTO_COMPRESS=FALSE OVERWRITE=TRUE"
-        print(f"Executing: {put_cmd}")
         cursor.execute(put_cmd)
         
         cursor.close()
         cnx.close()
-        
-        print(f"Fichier depose dans RAW_STAGE")
     
     create_bronze_table = SQLExecuteQueryOperator(
         task_id="create_bronze_table",
