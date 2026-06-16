@@ -100,7 +100,7 @@ def dvf_extraction_dag():
         
         # Connexion à la base
         engine = create_engine(
-            "postgresql://svc_dwh:svc_dwh@postgres-warehouse:5432/warehouse"
+            "postgresql://svc_airflow:airflow@postgres:5432/warehouse"
         )
         
         # Charger dans bronze (remplace si existe déjà)
