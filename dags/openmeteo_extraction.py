@@ -20,7 +20,17 @@ SELECT
 FROM bronze.meteo_quotidien
 ORDER BY date;
 """
-
+def notify_failure(context):
+    import requests
+    dag_id = context['dag'].dag_id
+    task_id = context['task_instance'].task_id
+    run_id = context['run_id']
+    execution_date = context['execution_date']
+    message = f" Échec Airflow\nDAG: {dag_id}\nTask: {task_id}\nRun: {run_id}\nDate: {execution_date}"
+    requests.post(
+        "https://ntfy.sh/airflow-platform-data-notifications",
+        data=message.encode('utf-8')
+    )
 
 @dag(
     dag_id="openmeteo_extraction",
@@ -28,6 +38,7 @@ ORDER BY date;
     start_date=datetime(2026, 1, 1),
     catchup=False,
     tags=["extraction", "meteo", "seance2"],
+    on_failure_callback=notify_failure,
 )
 def openmeteo_extraction_dag():
     
