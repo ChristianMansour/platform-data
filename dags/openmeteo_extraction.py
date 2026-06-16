@@ -55,8 +55,7 @@ def openmeteo_extraction_dag():
         longitude = 5.3698
         
         # URL de l'API Open-Meteo
-        url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe/Paris"
-        
+        url = "https://api.open-meteo.com/v1/MAUVAISE_URL"        
         print(f"Récupération des données météo pour Marseille")
         print(f"URL : {url}")
         
