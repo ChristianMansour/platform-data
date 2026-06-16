@@ -3,3 +3,5 @@ terraform.tfvars
 *.tfstate*
 terraform.tfstate.backup
 terraform.tfvars
+.env
+airflow/.env
