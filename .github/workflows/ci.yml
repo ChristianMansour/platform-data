@@ -1,0 +1,61 @@
+name: CI - DAG Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dags/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dags/**'
+
+jobs:
+  lint-and-parse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+          pip install apache-airflow==3.1.7 --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-3.1.7/constraints-3.12.txt"
+
+      - name: Lint DAGs with ruff
+        run: ruff check dags/
+
+      - name: Test DAG import (parsing)
+        run: |
+          export AIRFLOW_HOME=/tmp/airflow_home
+          python -c "
+          import sys
+          sys.path.insert(0, 'dags')
+          import ast
+          import os
+
+          errors = []
+          for filename in os.listdir('dags'):
+              if filename.endswith('.py'):
+                  filepath = os.path.join('dags', filename)
+                  try:
+                      with open(filepath) as f:
+                          ast.parse(f.read(), filename=filepath)
+                      print(f'OK: {filename}')
+                  except SyntaxError as e:
+                      errors.append(f'{filename}: {e}')
+
+          if errors:
+              print('Erreurs de syntaxe trouvees:')
+              for err in errors:
+                  print(f'  - {err}')
+              sys.exit(1)
+          else:
+              print('Tous les DAGs sont syntaxiquement valides')
+          "
