@@ -5,3 +5,4 @@ terraform.tfstate.backup
 terraform.tfvars
 .env
 airflow/.env
+dbt/profiles.yml

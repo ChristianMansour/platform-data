@@ -3,18 +3,18 @@ platform_dbt:
   outputs:
     dev:
       type: postgres
-      host: postgres-warehouse
+      host: localhost
       port: 5432
-      user: svc_dwh
-      password: svc_dwh
+      user: svc_airflow
+      password: <MOT_DE_PASSE>
       dbname: warehouse
       schema: bronze
       threads: 2
     snowflake:
       type: snowflake
-      account: XXLIRRB-PG74236
-      user: svc_terraform
-      password: TerraformPass123!
+      account: <ACCOUNT_SNOWFLAKE>
+      user: <USER_SNOWFLAKE>
+      password: <PASSWORD_SNOWFLAKE>
       role: ACCOUNTADMIN
       warehouse: PLATFORM_WH
       database: PLATFORM_DB
