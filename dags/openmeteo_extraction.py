@@ -2,8 +2,6 @@ from datetime import datetime, timedelta
 from airflow.sdk import dag, task
 import requests
 import json
-from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
-from airflow.operators.python import PythonOperator
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -59,7 +57,7 @@ def openmeteo_extraction_dag():
 
         # URL de l'API Open-Meteo
         url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe/Paris"
-        print(f"Récupération des données météo pour Marseille")
+        print("Récupération des données météo pour Marseille")
         print(f"URL : {url}")
 
         # Appel API
@@ -83,8 +81,6 @@ def openmeteo_extraction_dag():
     @task
     def load_to_bronze() -> None:
         """Charge les données JSON dans bronze.meteo_quotidien"""
-        import pandas as pd
-        from sqlalchemy import create_engine
         import json
 
         # Lire le fichier JSON

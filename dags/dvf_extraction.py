@@ -69,8 +69,6 @@ def dvf_extraction_dag():
     @task
     def load_to_bronze() -> None:
         """Charge les données CSV.gz dans bronze.dvf_mutations"""
-        import pandas as pd
-        from sqlalchemy import create_engine
         
         # Lire le fichier CSV compressé
         csv_path = "/opt/airflow/data/dvf_2025.csv.gz"
