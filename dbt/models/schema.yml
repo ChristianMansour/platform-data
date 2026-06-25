@@ -18,7 +18,8 @@ models:
         description: Température minimale quotidienne en °C
       - name: precipitation
         description: Précipitations totales en mm
-
+      - name: a_plu
+        description: Indicateur booléen - true si précipitation > 0 mm ce jour-là
   - name: dvf_mutations
     description: |
       Mutations immobilières DVF 2025 nettoyées (couche Silver).
