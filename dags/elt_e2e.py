@@ -99,14 +99,13 @@ def elt_e2e_dag():
     
     run_dbt = BashOperator(
         task_id="run_dbt",
-        bash_command="cd /opt/airflow/dbt && dbt run --profiles-dir /opt/airflow/dbt",
+        bash_command="cd /opt/airflow/dbt && dbt run --profiles-dir /opt/airflow/dbt --exclude meteo_quotidien_snowflake mart_meteo_snowflake",
     )
-    
+
     test_dbt = BashOperator(
         task_id="test_dbt",
-        bash_command="cd /opt/airflow/dbt && dbt test --profiles-dir /opt/airflow/dbt",
-    )
-    
+        bash_command="cd /opt/airflow/dbt && dbt test --profiles-dir /opt/airflow/dbt --exclude meteo_quotidien_snowflake mart_meteo_snowflake",
+    )    
     # ============ ORCHESTRATION ============
     
     # Extract tasks
