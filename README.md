@@ -88,3 +88,76 @@ Note : les permissions du volume pgAdmin doivent appartenir à l'UID 5050.
 ## Arrêt des services
 
     docker compose down
+
+## Flux ELT (Extraction → Chargement → Transformation)
+
+### Architecture du pipeline
+
+Le pipeline ELT complet est orchestré par Airflow et suit l'approche médaillon (Bronze → Silver → Gold).
+
+**Sources de données :**
+- DVF 2025 (data.gouv.fr) : fichier CSV des mutations immobilières
+- Open-Meteo (API) : données météo quotidiennes pour Marseille
+
+**DAGs Airflow disponibles :**
+
+| DAG | Rôle |
+|---|---|
+| `dvf_2025_extraction` | Extraction DVF → Bronze → Silver |
+| `openmeteo_extraction` | Extraction météo → Bronze → Silver |
+| `elt_e2e` | Pipeline complet E→L→T (extraction + chargement + dbt run + dbt test) |
+| `elt_snowflake` | Pipeline E→L→T sur Snowflake |
+
+### Lancer le flux ELT complet
+
+1. Ouvrir l'UI Airflow : http://10.1.1.1:8081 (login `airflow`/`airflow`)
+2. Activer et déclencher le DAG `elt_e2e`
+3. Le DAG enchaîne automatiquement :
+   - Extraction météo + DVF (parallèle)
+   - Chargement Bronze (météo + DVF)
+   - `dbt run` (construction Silver + Gold)
+   - `dbt test` (validation qualité des données)
+
+### Où voir les données
+
+- **Bronze** : schéma `bronze` (données brutes)
+- **Silver** : schéma `bronze_silver` (données nettoyées et typées)
+- **Gold** : schéma `bronze_gold` (marts métier, schéma en étoile DVF)
+
+Consultable via pgAdmin (http://10.1.1.1:5050) ou directement en SQL :
+```sql
+SELECT * FROM bronze_gold.fact_mutations LIMIT 10;
+SELECT * FROM bronze_gold.mart_meteo_quotidien;
+```
+
+### Documentation dbt
+
+```bash
+cd ~/platform-data/dbt
+dbt docs generate --exclude meteo_quotidien_snowflake mart_meteo_snowflake
+dbt docs serve --port 8082 --host 0.0.0.0
+```
+Puis ouvrir http://10.1.1.1:8082
+
+## Gouvernance et gestion des secrets
+
+Aucun mot de passe, token ou clé API n'est versionné en clair dans le code.
+
+### Connexions Airflow (Admin → Connections)
+
+| Connection ID | Type | Usage |
+|---|---|---|
+| `postgres_warehouse` | Postgres | Accès à la base `warehouse` depuis les DAGs |
+| `my_git_conn` | Generic | Authentification GitDagBundle |
+
+Dans le code des DAGs, les credentials sont récupérés via :
+```python
+from airflow.hooks.base import BaseHook
+conn = BaseHook.get_connection("postgres_warehouse")
+```
+
+### Fichiers exclus du versioning (`.gitignore`)
+
+- `airflow/.env` (clé Fernet, identifiants Airflow)
+- `dbt/profiles.yml` (credentials Postgres + Snowflake) — voir `dbt/profiles.yml.example` pour la structure attendue
+- `terraform.tfvars`, `*.tfstate*`
