@@ -98,10 +98,11 @@ def openmeteo_extraction_dag():
         })
 
         # Connexion à la base
+        from airflow.hooks.base import BaseHook
+        conn = BaseHook.get_connection("postgres_warehouse")
         engine = create_engine(
-            "postgresql://svc_airflow:airflow@postgres:5432/warehouse"
+            f"postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}"
         )
-
         # Charger dans bronze (remplace si existe déjà)
         df.to_sql(
             "meteo_quotidien",
