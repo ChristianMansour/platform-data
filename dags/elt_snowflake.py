@@ -156,7 +156,7 @@ def elt_snowflake_dag():
             FROM @PLATFORM_DB.BRONZE.RAW_STAGE/dvf/annee=2025/
             FILE_FORMAT = (
                 TYPE = CSV
-                FIELD_DELIMITER = '|'
+                FIELD_DELIMITER = ','
                 SKIP_HEADER = 1
                 NULL_IF = ('', 'NULL')
                 COMPRESSION = GZIP
