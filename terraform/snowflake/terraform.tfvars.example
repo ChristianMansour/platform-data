@@ -1,0 +1,3 @@
+snowflake_account  = "<ACCOUNT_IDENTIFIER>"
+snowflake_user     = "svc_terraform"
+snowflake_password = "<MOT_DE_PASSE>"
