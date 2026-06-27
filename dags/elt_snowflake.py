@@ -160,12 +160,11 @@ def elt_snowflake_dag():
                 SKIP_HEADER = 1
                 NULL_IF = ('', 'NULL')
                 COMPRESSION = GZIP
+                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
             )
-            MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
             ON_ERROR = 'CONTINUE'
         """,
     )
-
     # ============ DBT TRANSFORM ============
 
     run_dbt_snowflake = BashOperator(
