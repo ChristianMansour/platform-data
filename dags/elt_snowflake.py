@@ -146,25 +146,32 @@ def elt_snowflake_dag():
             )
         """,
     )
-
     copy_bronze_dvf = SQLExecuteQueryOperator(
         task_id="copy_dvf_to_bronze",
         conn_id="snowflake_platform",
         sql="""
             TRUNCATE TABLE PLATFORM_DB.BRONZE.DVF_MUTATIONS;
             COPY INTO PLATFORM_DB.BRONZE.DVF_MUTATIONS
-            FROM @PLATFORM_DB.BRONZE.RAW_STAGE/dvf/annee=2025/
+                (date_mutation, nature_mutation, valeur_fonciere, code_commune,
+                 nom_commune, type_local, surface_reelle_bati, nombre_pieces_principales)
+            FROM (
+                SELECT
+                    $2, $4, $5, $11, $12, $31, $32, $33
+                FROM @PLATFORM_DB.BRONZE.RAW_STAGE/dvf/annee=2025/
+            )
             FILE_FORMAT = (
                 TYPE = CSV
                 FIELD_DELIMITER = ','
                 SKIP_HEADER = 1
                 NULL_IF = ('', 'NULL')
                 COMPRESSION = GZIP
-                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                FIELD_OPTIONALLY_ENCLOSED_BY = '"'
             )
             ON_ERROR = 'CONTINUE'
         """,
     )
+
+
     # ============ DBT TRANSFORM ============
 
     run_dbt_snowflake = BashOperator(
