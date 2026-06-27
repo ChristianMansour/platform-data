@@ -173,10 +173,9 @@ def elt_snowflake_dag():
 
 
     # ============ DBT TRANSFORM ============
-
     run_dbt_snowflake = BashOperator(
         task_id="run_dbt_snowflake",
-        bash_command="cd /opt/airflow/dbt && dbt run --profiles-dir /opt/airflow/dbt --target snowflake --select meteo_quotidien_snowflake mart_meteo_snowflake",
+        bash_command="cd /opt/airflow/dbt && dbt run --profiles-dir /opt/airflow/dbt --target snowflake --select meteo_quotidien_snowflake mart_meteo_snowflake dvf_mutations_snowflake mart_dvf_par_commune_snowflake",
     )
 
     # ============ ORCHESTRATION ============
